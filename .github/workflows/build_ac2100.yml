@@ -1,6 +1,12 @@
 name: build_ac2100
 on:
-  workflow_dispatch:
+  push:
+    branches: 
+      - master
+  # schedule:
+  #   - cron: 0 20 * * *
+  release:
+    types: [published]
 
 jobs:
   MT7621:
@@ -19,7 +25,7 @@ jobs:
 
       - name: Download and Load custom configuration
         run: |
-          curl -fsSL https://raw.githubusercontent.com/1orz/My-action/master/lean-lede/mt7621/.config >.config
+          curl -fsSL https://raw.githubusercontent.com/7336666/lede/master/myconfig/mt7621/.config >.config
           bash <(curl -fsSL https://raw.githubusercontent.com/1orz/My-action/master/lean-lede/diy.sh)
           make defconfig
 
@@ -33,3 +39,18 @@ jobs:
           sudo df -h
           make -j$(nproc) || make -j1 V=sc
           sudo df -h
+
+      - name: Only Upload Packages to Download Station
+        if: success()
+        run: |
+          cd bin
+          zip -r -o -q -9  mt7621-Package.zip . -i *.ipk
+
+      - name: Only Upload firmware (Without packages)
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: mt7621
+          path: bin/targets/*/*
+
+
