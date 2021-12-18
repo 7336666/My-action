@@ -40,12 +40,6 @@ jobs:
           make -j$(nproc) || make -j1 V=sc
           sudo df -h
 
-      - name: Only Upload Packages to Download Station
-        if: success()
-        run: |
-          cd bin
-          zip -r -o -q -9  mt7621-Package.zip . -i *.ipk
-
       - name: Only Upload firmware (Without packages)
         uses: actions/upload-artifact@v2
         if: always()
